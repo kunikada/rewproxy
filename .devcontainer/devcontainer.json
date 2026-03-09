@@ -1,0 +1,41 @@
+{
+  "name": "rewproxy-dev",
+  "build": {
+    "dockerfile": "../Dockerfile"
+  },
+  "mounts": [
+    "source=${env:SSH_AUTH_SOCK},target=/ssh-agent,type=bind,consistency=cached",
+    "source=rewproxy-home-appuser,target=/home/appuser,type=volume"
+  ],
+  "remoteEnv": {
+    "SSH_AUTH_SOCK": "/ssh-agent",
+    "GOPATH": "/home/appuser/go",
+    "PATH": "/home/appuser/go/bin:/usr/local/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "golang.Go",
+        "streetsidesoftware.code-spell-checker",
+        "Anthropic.claude-code",
+        "google.gemini-cli-vscode-ide-companion",
+        "openai.chatgpt"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "golang.Go",
+        "[go]": {
+          "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit"
+          }
+        },
+        "go.toolsManagement.autoUpdate": true,
+        "go.lintTool": "golangci-lint",
+        "go.lintOnSave": "package",
+        "go.testFlags": ["-race"],
+        "go.coverOnSave": false
+      }
+    }
+  },
+  "remoteUser": "appuser"
+}

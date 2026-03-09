@@ -1,0 +1,18 @@
+# version control
+.git/
+.gitignore
+
+# development config (mounted at runtime)
+config.yaml
+
+# docs
+README.md
+CONTRIBUTING.md
+
+# editor
+.vscode/
+.idea/
+*.swp
+
+# devcontainer
+.devcontainer/

@@ -1,0 +1,33 @@
+# rewproxy configuration example
+
+# Address to listen on (default: :8080)
+listen: ":8080"
+
+# Enable access logging (one line per request). Default: false
+# access_log: true
+
+rules:
+
+  # Rewrite outbound host from one name to another.
+  # Applies to both plain HTTP and HTTPS CONNECT tunnel targets.
+  - host_rewrite:
+      from: "old.example.com"
+      to: "example.com"
+
+  # Set (or overwrite) a request header before forwarding.
+  # Applies to plain HTTP only (not visible inside HTTPS tunnels).
+  - header_set:
+      name: "User-Agent"
+      value: "rewproxy"
+
+  # Rewrite a URL path prefix.
+  # /api/v1/users → /v2/users
+  # - url_rewrite:
+  #     from: "/api/v1"
+  #     to: "/v2"
+
+  # Set (or overwrite) a query parameter.
+  # ?env=staging appended/overwritten on every request
+  # - query_rewrite:
+  #     name: "env"
+  #     value: "staging"

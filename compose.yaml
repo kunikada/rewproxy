@@ -1,0 +1,10 @@
+services:
+  rewproxy:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./config.yaml:/etc/rewproxy/config.yaml:ro
+    command: ["--config", "/etc/rewproxy/config.yaml"]

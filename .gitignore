@@ -1,0 +1,10 @@
+# binary
+rewproxy
+
+# test cache
+/tmp/
+
+# editor
+.vscode/
+.idea/
+*.swp
