@@ -78,31 +78,7 @@ docker compose up -d
 
 ## Configuration Example
 
-listen: ":8080"
-
-rules:
-
-  - host_rewrite:
-      from: "old.example.com"
-      to: "example.com"
-
-  - header_set:
-      name: "User-Agent"
-      value: "rewproxy"
-
-
-## Motivation
-
-Sometimes external services change domains or endpoints.
-Updating all client code can be slow or impossible.
-
-rewproxy provides a small proxy layer that transparently
-redirects requests to the new destination.
-
-
-## Status
-
-Experimental
+See [config.yaml](config.yaml).
 
 
 ## License
