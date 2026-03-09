@@ -26,7 +26,7 @@ func main() {
 		log.Fatalf("build rules: %v", err)
 	}
 
-	h := &proxy.Handler{Pipeline: pipeline, AccessLog: cfg.AccessLog}
+	h := &proxy.Handler{Pipeline: pipeline, AccessLog: cfg.AccessLog, FollowRedirects: cfg.FollowRedirects}
 
 	log.Printf("rewproxy v%s listening on %s", version, cfg.Listen)
 	if err := http.ListenAndServe(cfg.Listen, h); err != nil {
