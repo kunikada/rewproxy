@@ -49,7 +49,9 @@ func TestHandleHTTP_noRules(t *testing.T) {
 		t.Fatalf("GET: %v", err)
 	}
 	defer resp.Body.Close()
-	io.Copy(io.Discard, resp.Body)
+	if _, err := io.Copy(io.Discard, resp.Body); err != nil {
+		t.Fatalf("discard body: %v", err)
+	}
 
 	if resp.StatusCode != http.StatusOK {
 		t.Errorf("status = %d, want 200", resp.StatusCode)
@@ -72,7 +74,9 @@ func TestHandleHTTP_headerSet(t *testing.T) {
 		t.Fatalf("GET: %v", err)
 	}
 	defer resp.Body.Close()
-	io.Copy(io.Discard, resp.Body)
+	if _, err := io.Copy(io.Discard, resp.Body); err != nil {
+		t.Fatalf("discard body: %v", err)
+	}
 
 	if got := captured.Header.Get("X-Test"); got != "rewproxy" {
 		t.Errorf("X-Test = %q, want %q", got, "rewproxy")
@@ -103,7 +107,9 @@ func TestHandleHTTP_hostRewrite(t *testing.T) {
 		t.Fatalf("GET: %v", err)
 	}
 	defer resp.Body.Close()
-	io.Copy(io.Discard, resp.Body)
+	if _, err := io.Copy(io.Discard, resp.Body); err != nil {
+		t.Fatalf("discard body: %v", err)
+	}
 
 	if resp.StatusCode != http.StatusOK {
 		t.Errorf("status = %d, want 200", resp.StatusCode)
@@ -135,7 +141,9 @@ func TestHandleTunnel_connect(t *testing.T) {
 		t.Fatalf("GET via CONNECT: %v", err)
 	}
 	defer resp.Body.Close()
-	io.Copy(io.Discard, resp.Body)
+	if _, err := io.Copy(io.Discard, resp.Body); err != nil {
+		t.Fatalf("discard body: %v", err)
+	}
 
 	if resp.StatusCode != http.StatusOK {
 		t.Errorf("status = %d, want 200", resp.StatusCode)
@@ -172,7 +180,46 @@ func TestHandleTunnel_hostRewrite(t *testing.T) {
 		t.Fatalf("GET via CONNECT with host rewrite: %v", err)
 	}
 	defer resp.Body.Close()
-	io.Copy(io.Discard, resp.Body)
+	if _, err := io.Copy(io.Discard, resp.Body); err != nil {
+		t.Fatalf("discard body: %v", err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("status = %d, want 200", resp.StatusCode)
+	}
+}
+
+func TestHandleTunnel_hostRewrite_suffixMatch(t *testing.T) {
+	upstream := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+	t.Cleanup(upstream.Close)
+
+	upstreamURL, _ := url.Parse(upstream.URL)
+	upstreamHost := upstreamURL.Hostname()
+
+	pipeline := rule.Pipeline{
+		&rule.HostRewriteRule{From: "example.com", To: upstreamHost},
+	}
+	proxySrv := newProxyServer(t, pipeline)
+
+	proxyURL, _ := url.Parse(proxySrv.URL)
+	client := &http.Client{
+		Transport: &http.Transport{
+			Proxy:           http.ProxyURL(proxyURL),
+			TLSClientConfig: upstream.Client().Transport.(*http.Transport).TLSClientConfig,
+		},
+	}
+
+	targetURL := "https://api.example.com:" + upstreamURL.Port() + "/rewritten"
+	resp, err := client.Get(targetURL)
+	if err != nil {
+		t.Fatalf("GET via CONNECT with suffix host rewrite: %v", err)
+	}
+	defer resp.Body.Close()
+	if _, err := io.Copy(io.Discard, resp.Body); err != nil {
+		t.Fatalf("discard body: %v", err)
+	}
 
 	if resp.StatusCode != http.StatusOK {
 		t.Errorf("status = %d, want 200", resp.StatusCode)

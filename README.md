@@ -25,20 +25,25 @@ client → rewproxy → internet
 
 ## Example
 
-Rewrite requests from `old.example.com` to `example.com`.
+Rewrite requests targeting `*.legacy.example` to `gateway.example`.
 
 rules:
   - host_rewrite:
-      from: old.example.com
-      to: example.com
+      from: legacy.example
+      to: gateway.example
 
 Request:
 
-https://old.example.com/path/to/resource
+https://api.legacy.example/v1/resource
 
 Forwarded as:
 
-https://example.com/path/to/resource
+https://gateway.example/v1/resource
+
+`host_rewrite` matching rules:
+- Matches exact host (`legacy.example`) or subdomains by suffix (`api.legacy.example` matches `legacy.example`).
+- Replaces the full host with `to` (subdomain labels are not preserved).
+- If the original request had an explicit port and `to` does not include one, the original port is kept.
 
 
 ## Usage
