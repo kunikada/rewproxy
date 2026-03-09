@@ -10,7 +10,7 @@ import (
 	"rewproxy/internal/proxy"
 )
 
-var version = "1.0.0"
+var version = "1.1.0"
 
 func main() {
 	configPath := flag.String("config", "config.yaml", "path to config file")

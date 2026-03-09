@@ -23,8 +23,9 @@ type RuleConfig struct {
 }
 
 type HostRewriteConfig struct {
-	From string `yaml:"from"`
-	To   string `yaml:"to"`
+	From              string `yaml:"from"`
+	To                string `yaml:"to"`
+	PreserveSubdomain bool   `yaml:"preserve_subdomain,omitempty"`
 }
 
 type HeaderSetConfig struct {

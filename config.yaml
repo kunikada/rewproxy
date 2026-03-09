@@ -15,9 +15,12 @@ rules:
 
   # Rewrite outbound host from one name to another.
   # Applies to both plain HTTP and HTTPS CONNECT tunnel targets.
+  # preserve_subdomain: when true, sub.domain-a.com -> sub.domain-b.com.
+  #                     when false (default), sub.domain-a.com -> domain-b.com.
   - host_rewrite:
-      from: "old.example.com"
-      to: "example.com"
+      from: "domain-a.com"
+      to: "domain-b.com"
+      # preserve_subdomain: true
 
   # Set (or overwrite) a request header before forwarding.
   # Applies to plain HTTP only (not visible inside HTTPS tunnels).

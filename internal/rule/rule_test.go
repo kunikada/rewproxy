@@ -88,6 +88,76 @@ func TestHostRewriteRule_withPort_toHasPort(t *testing.T) {
 	}
 }
 
+func TestHostRewriteRule_preserveSubdomain(t *testing.T) {
+	r := &rule.HostRewriteRule{From: "domain-a.com", To: "domain-b.com", PreserveSubdomain: true}
+	req, _ := http.NewRequest("GET", "http://sub.domain-a.com/path", nil)
+
+	if err := r.Apply(req); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if got := req.URL.Host; got != "sub.domain-b.com" {
+		t.Errorf("URL.Host = %q, want %q", got, "sub.domain-b.com")
+	}
+	if got := req.Host; got != "sub.domain-b.com" {
+		t.Errorf("Host = %q, want %q", got, "sub.domain-b.com")
+	}
+}
+
+func TestHostRewriteRule_preserveSubdomain_exactMatch(t *testing.T) {
+	// Exact match has no subdomain to preserve; behaves like preserve_subdomain=false.
+	r := &rule.HostRewriteRule{From: "domain-a.com", To: "domain-b.com", PreserveSubdomain: true}
+	req, _ := http.NewRequest("GET", "http://domain-a.com/path", nil)
+
+	if err := r.Apply(req); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if got := req.URL.Host; got != "domain-b.com" {
+		t.Errorf("URL.Host = %q, want %q", got, "domain-b.com")
+	}
+}
+
+func TestHostRewriteRule_preserveSubdomain_false(t *testing.T) {
+	// Default (false): subdomain is dropped.
+	r := &rule.HostRewriteRule{From: "domain-a.com", To: "domain-b.com"}
+	req, _ := http.NewRequest("GET", "http://sub.domain-a.com/path", nil)
+
+	if err := r.Apply(req); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if got := req.URL.Host; got != "domain-b.com" {
+		t.Errorf("URL.Host = %q, want %q", got, "domain-b.com")
+	}
+}
+
+func TestHostRewriteRule_preserveSubdomain_toHasPort(t *testing.T) {
+	// To specifies a port; source has no port. To's port must be kept, subdomain preserved.
+	r := &rule.HostRewriteRule{From: "domain-a.com", To: "domain-b.com:8443", PreserveSubdomain: true}
+	req, _ := http.NewRequest("GET", "http://sub.domain-a.com/path", nil)
+
+	if err := r.Apply(req); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if got := req.URL.Host; got != "sub.domain-b.com:8443" {
+		t.Errorf("URL.Host = %q, want %q", got, "sub.domain-b.com:8443")
+	}
+	if got := req.Host; got != "sub.domain-b.com:8443" {
+		t.Errorf("Host = %q, want %q", got, "sub.domain-b.com:8443")
+	}
+}
+
+func TestHostRewriteRule_preserveSubdomain_srcHasPort(t *testing.T) {
+	// Source has a port, To has none. Source's port must be preserved alongside the subdomain.
+	r := &rule.HostRewriteRule{From: "domain-a.com", To: "domain-b.com", PreserveSubdomain: true}
+	req, _ := http.NewRequest("GET", "http://sub.domain-a.com:9090/path", nil)
+
+	if err := r.Apply(req); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if got := req.URL.Host; got != "sub.domain-b.com:9090" {
+		t.Errorf("URL.Host = %q, want %q", got, "sub.domain-b.com:9090")
+	}
+}
+
 func TestHostRewriteRule_emptyFrom_noMatch(t *testing.T) {
 	r := &rule.HostRewriteRule{From: "", To: "example.net"}
 	req, _ := http.NewRequest("GET", "http://example.com/path", nil)

@@ -6,14 +6,22 @@ import (
 	"strings"
 )
 
-type HostRewriteRule struct{ From, To string }
+type HostRewriteRule struct {
+	From              string
+	To                string
+	PreserveSubdomain bool
+}
 
 func (r *HostRewriteRule) Apply(req *http.Request) error {
 	host, port := splitHostPort(req.URL.Host)
 	if hostRewriteMatch(host, r.From) {
-		// Rewrite always replaces the full hostname with To.
-		// Subdomains are not preserved (e.g. api.example.com -> example.net).
 		rewritten := r.To
+		// If PreserveSubdomain is set and host has a subdomain prefix, prepend it to To.
+		// e.g. "sub.domain-a.com" -> "sub.domain-b.com" when From="domain-a.com".
+		if r.PreserveSubdomain && host != r.From {
+			prefix := strings.TrimSuffix(host, "."+r.From)
+			rewritten = prefix + "." + r.To
+		}
 		if _, toPort := splitHostPort(rewritten); toPort == "" && port != "" {
 			rewritten = net.JoinHostPort(rewritten, port)
 		}
