@@ -39,7 +39,7 @@ func buildOne(rc config.RuleConfig) (rule.Rule, error) {
 
 	switch {
 	case rc.HostRewrite != nil:
-		return &rule.HostRewriteRule{From: rc.HostRewrite.From, To: rc.HostRewrite.To}, nil
+		return &rule.HostRewriteRule{From: rc.HostRewrite.From, To: rc.HostRewrite.To, PreserveSubdomain: rc.HostRewrite.PreserveSubdomain}, nil
 	case rc.HeaderSet != nil:
 		return &rule.HeaderSetRule{Name: rc.HeaderSet.Name, Value: rc.HeaderSet.Value}, nil
 	case rc.URLRewrite != nil:

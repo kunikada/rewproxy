@@ -8,9 +8,10 @@ import (
 )
 
 type Config struct {
-	Listen    string       `yaml:"listen"`
-	AccessLog bool         `yaml:"access_log"`
-	Rules     []RuleConfig `yaml:"rules"`
+	Listen          string       `yaml:"listen"`
+	AccessLog       bool         `yaml:"access_log"`
+	FollowRedirects bool         `yaml:"follow_redirects"`
+	Rules           []RuleConfig `yaml:"rules"`
 }
 
 // RuleConfig holds exactly one rule type.
@@ -22,8 +23,9 @@ type RuleConfig struct {
 }
 
 type HostRewriteConfig struct {
-	From string `yaml:"from"`
-	To   string `yaml:"to"`
+	From              string `yaml:"from"`
+	To                string `yaml:"to"`
+	PreserveSubdomain bool   `yaml:"preserve_subdomain,omitempty"`
 }
 
 type HeaderSetConfig struct {
